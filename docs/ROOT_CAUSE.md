@@ -19,7 +19,7 @@ The earlier checks inspected API names, argument counts, data references, and XM
 They did not parse Galaxy grammar, so they missed the declaration error. That
 validation gap allowed a non-compiling update to replace the working map.
 
-## Active recovery
+## Recovered baseline at stable-marine-v0.1
 
 - `src/Arena.galaxy` is restored byte-for-byte from the working Marine-only backup.
 - `Triggers` and `MapScript.galaxy` match that backup after line-ending normalization.

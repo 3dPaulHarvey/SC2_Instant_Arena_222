@@ -6,7 +6,7 @@
     </Root>
     <Element Type="CustomScript" Id="A0000001">
         <ScriptCode>
-// Instant Arena v0.1 - local solo prototype.
+// Instant Arena v0.1.1 - Marine button portrait test.
 // The build script embeds this code into the map's editable Custom Script element.
 
 const int ARENA_PLAYER = 1;
@@ -124,6 +124,7 @@ bool ArenaUnitDied (bool testConds, bool runActions) {
 void ArenaInit () {
     int titleLabel;
     int helpLabel;
+    int marinePortrait;
     trigger buttonTrigger;
     trigger deathTrigger;
 
@@ -147,6 +148,15 @@ void ArenaInit () {
     DialogControlSetSize(arenaStatusLabel, PlayerGroupSingle(ARENA_PLAYER), 260, 24);
     DialogControlSetPosition(arenaStatusLabel, PlayerGroupSingle(ARENA_PLAYER), c_anchorTopLeft, 20, 42);
     arenaSpawnButton = ArenaButton("Spawn My Marine", 72);
+    // Add one portrait to the existing button; keep its click handler unchanged.
+    marinePortrait = DialogControlCreate(arenaDialog, c_triggerControlTypeImage);
+    DialogControlSetSize(marinePortrait, PlayerGroupSingle(ARENA_PLAYER), 32, 32);
+    DialogControlSetPosition(marinePortrait, PlayerGroupSingle(ARENA_PLAYER), c_anchorTopLeft, 25, 75);
+    libNtve_gf_SetDialogItemImageType(marinePortrait, c_triggerImageTypeNormal, PlayerGroupSingle(ARENA_PLAYER));
+    libNtve_gf_SetDialogItemImage(marinePortrait, "Assets\\Textures\\btn-unit-terran-marine.dds", PlayerGroupSingle(ARENA_PLAYER));
+    libNtve_gf_SetDialogItemRenderPriority(marinePortrait, 100, PlayerGroupSingle(ARENA_PLAYER));
+    DialogControlSetPropertyAsBool(marinePortrait, c_triggerControlPropertyAcceptMouseTarget,
+        PlayerGroupSingle(ARENA_PLAYER), false);
     arenaEnemyButton = ArenaButton("Spawn Enemy Marine", 116);
     arenaClearButton = ArenaButton("Clear My Army", 160);
     arenaResetButton = ArenaButton("Reset Arena", 204);

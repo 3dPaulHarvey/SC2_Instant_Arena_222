@@ -3,9 +3,9 @@
 A StarCraft II custom arena for instant unit spawning and continuous combat.
 
 The active build is the **Basic Marine arena**, restored from the version that
-worked in the user's solo test. The user also confirmed the recovery test works.
-Race menus, unit icons, and speed controls are archived while the baseline is
-stabilized. Nothing has been published to Battle.net.
+worked in the user's solo test. Version 0.1.1 adds one small Marine portrait icon
+inside **Spawn My Marine**. The spawn logic remains the tested baseline.
+Race menus and speed controls remain archived. Nothing has been published to Battle.net.
 
 ## Open and test
 
@@ -21,7 +21,8 @@ living spawned units.
 
 If you see race menus, close the old experimental map and reopen the Basic map
 with the launcher. See [SOLO_TEST.md](docs/SOLO_TEST.md) for the recovery checklist
-and [ROOT_CAUSE.md](docs/ROOT_CAUSE.md) for the compiler failure and repair.
+and [NEXT_SOLO_TEST.md](docs/NEXT_SOLO_TEST.md) for the new portrait click test.
+See [ROOT_CAUSE.md](docs/ROOT_CAUSE.md) for the compiler failure and repair.
 
 ## Project files
 
@@ -68,8 +69,9 @@ failure before the playable map is overwritten.
 
 ## Next development steps
 
-Add a plain Zealot button and a plain Zergling button first. Test that small change
-before bringing back navigation, icons, or speed controls, one feature at a time.
+First confirm the Marine portrait renders and allows clicks to reach its existing
+button. Then add plain Zealot and Zergling buttons, before restoring navigation
+or speed controls one feature at a time.
 
 Online 1v1 still needs a second human slot, per-player controls, and a two-client
 test before publishing.
