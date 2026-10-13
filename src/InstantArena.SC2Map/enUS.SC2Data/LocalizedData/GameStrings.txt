@@ -1,6 +1,0 @@
-DocInfo/Name=Instant Arena - Solo Prototype v0.2
-DocInfo/DescShort=Race menus, instant units, and live game speed.
-DocInfo/DescLong=Choose a race and spawn friendly or enemy units using icon buttons. Clear armies, practice micro, and change game speed during play. Local solo prototype; configure a second human slot before online 1v1.
-MapInfo/Player00/Name=Neutral
-MapInfo/Player01/Name=You
-MapInfo/Player15/Name=Enemy
