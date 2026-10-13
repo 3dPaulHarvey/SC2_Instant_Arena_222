@@ -2,9 +2,10 @@
 
 A StarCraft II custom arena for instant unit spawning and continuous combat.
 
-The active build is **v0.1.2: compact text submenus**, based on the working solo
+The active build is **v0.1.3: live game-speed slider**, based on the working solo
 arena. Choose a race, choose a unit, then spawn it for your army or the enemy.
-The portrait experiment has been removed. Nothing has been published to Battle.net.
+Drag the speed slider while playing to slow down or speed up the entire match.
+Nothing has been published to Battle.net.
 
 ## Open and test
 
@@ -15,6 +16,8 @@ The portrait experiment has been removed. Nothing has been published to Battle.n
 5. Choose **Terran**, **Protoss**, or **Zerg** in the top dropdown. The second
    dropdown lists that race's units.
 6. Use **Spawn My [Unit]**, **Spawn Enemy [Unit]**, **Clear My Army**, and **Reset Arena**.
+7. Drag the **Game speed** slider at the bottom of the panel. It snaps to
+   **Slower, Slow, Normal, Fast, Faster**, from left to right.
 
 Enemy units attack-move toward your spawn area. You command your own units
 normally. Losing all units does not end the session. Each side can have up to 100
@@ -28,6 +31,10 @@ living spawned units.
 
 Changing race selects its first unit. Menu selections do not spawn anything.
 Reset Arena clears both armies and leaves the menu selection in place.
+The match starts at **Normal** speed. The slider changes SC2's live game speed;
+its label displays the engine's actual preset. Reset Arena keeps your chosen speed.
+Player 1 controls speed for the whole match. Online speed control still needs a
+two-client test when multiplayer support is added.
 See [NEXT_SOLO_TEST.md](docs/NEXT_SOLO_TEST.md) for the current play checklist
 and [SOLO_TEST.md](docs/SOLO_TEST.md) for the original recovery test.
 See [ROOT_CAUSE.md](docs/ROOT_CAUSE.md) for the compiler failure and repair.
@@ -36,7 +43,7 @@ See [ROOT_CAUSE.md](docs/ROOT_CAUSE.md) for the compiler failure and repair.
 
 | Path | Purpose |
 | --- | --- |
-| `src/Arena.galaxy` | Arena source, including the race and unit submenus |
+| `src/Arena.galaxy` | Arena source, race/unit submenus, and live speed control |
 | `src/InstantArena_Basic.SC2Map/` | The active editable map, including terrain and triggers |
 | `tools/build_map.py` | Checks syntax before updating the map's script and triggers |
 | `tools/validate_galaxy.py` | Runs the bundled Galaxy syntax parser |
@@ -77,9 +84,9 @@ failure before the playable map is overwritten.
 
 ## Next development steps
 
-Confirm the race and unit dropdowns work and all twelve units spawn correctly.
-Then expand the roster one small step at a time. Speed controls remain a separate
-future increment.
+Confirm dragging the slider changes movement and combat speed during a fight.
+Check the race/unit menus and clear/reset controls at both speed extremes.
+Then expand the roster one small step at a time.
 
 Online 1v1 still needs a second human slot, per-player controls, and a two-client
 test before publishing.
@@ -93,3 +100,4 @@ preserved by SC2Mapster. Its placed units were removed and its triggers replaced
 - [Blizzard's Trigger Module tutorial and local Test Document](https://s2editor-guides.readthedocs.io/Classic_Tutorials/02_Trigger_Module/1/)
 - [Component-folder export](https://s2editor-guides.readthedocs.io/New_Tutorials/07_Lessons/083_Export_Game_Assets/)
 - [Bundled parser provenance and MIT license](tools/galaxy_parser/README.md)
+- [Blizzard's shipped native speed API and cinematic speed changes](https://github.com/SC2Mapster/SC2GameData/blob/master/mods/core.sc2mod/base.sc2data/TriggerLibs/NativeLib.galaxy)

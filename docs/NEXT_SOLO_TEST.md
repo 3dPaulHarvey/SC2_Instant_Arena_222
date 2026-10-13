@@ -1,35 +1,39 @@
 # Next solo test
 
-The **Basic Marine arena** recovery test passed. Version 0.1.2 removes portraits
-and adds compact **Race → Unit** text dropdowns. The same four action buttons
-handle every unit.
+Version **0.1.3** adds a live game-speed slider below the arena controls.
+The race/unit dropdowns and four army buttons are still available.
 
-Test the submenus:
+Test live speed:
 
 1. Reopen the Basic map using **Open Arena.cmd**, then press **Ctrl+F9**.
-2. The top dropdown should show **Terran**, and the next should show **Marine**.
-   Spawn a Marine on each side to confirm the previous working behavior.
-3. Choose **Marauder** in the unit dropdown. Both spawn button captions should
-   change to Marauder. Changing the selection should leave unit counts unchanged.
-   Click each spawn button once: each click should create one Marauder on that side.
-4. Switch the race dropdown to **Protoss**. Its unit list should contain only
-   **Zealot, Stalker, Sentry, Immortal**, with Zealot selected initially.
-   Choose Stalker and spawn one on each side.
-5. Switch to **Zerg**. Its list should contain only
-   **Zergling, Roach, Hydralisk, Ultralisk**, starting with Zergling.
-   Choose Hydralisk and spawn one on each side.
-6. Switch back to Terran. Its list should contain only
-   **Marine, Marauder, Reaper, Hellion**, starting with Marine. Repeat race switches
-   several times and check that entries never accumulate or carry over.
-7. Try every remaining unit once on each side, then test **Clear My Army** and
-   **Reset Arena**. Reset should zero both counters and keep your selected unit.
-8. Fight, lose all your units, then spawn again. The session should continue.
+2. Check that the speed label says **Game speed: Normal** and the slider starts
+   in the middle. The slider should remain below the reset button and help text.
+3. Spawn a few units for yourself and an enemy unit. Watch the enemy moving toward
+   your army, or order your own units to move across the arena.
+4. While those units are moving, drag the slider all the way left. It should snap
+   to **Slower**, update the label, and immediately slow movement and combat.
+5. Drag it all the way right. It should snap to **Faster**, update the label, and
+   immediately speed up the same existing units. Reloading the map is unnecessary.
+6. Try the three interior positions: **Slow**, **Normal**, and **Fast**. Drag back
+   and forth repeatedly. The label and slider should settle on the same preset.
+7. At Slower and Faster, switch races, select a different unit, and use both spawn
+   buttons. Each click should still create one unit. Changing speed should not
+   spawn, clear, or replace any units.
+8. Test **Clear My Army** and **Reset Arena**. Reset should zero both counters while
+   keeping the selected unit and speed. Move the slider back to Normal afterward.
+9. If SC2's own speed controls are available in the game menu, change speed there
+   once. The arena slider and label should catch up within about half a second.
 
-Galaxy syntax and all four recovery checks pass. SC2 runtime launches have produced
-no script-error log. The first run reported dropdown text overflow; the controls
-now use 52px height to provide enough padding. Dropdown rendering and clicks
-still need this manual play check. The game has normal unit abilities and combat
-rules; selection changes do not train, upgrade, or issue orders to existing units.
+The slider snaps to SC2's five native game-speed presets.
+This affects the whole match. The current solo controller is Player 1; online 1v1
+still needs a second-human setup and a two-client test.
+
+Galaxy syntax and all four recovery checks pass. An isolated SC2 runtime test also
+passed all five presets: each requested speed matched the engine's actual value
+and slider position, Faster advanced game time faster than Slower, and the test
+restored Normal afterward. No script or text-error log was produced during this run.
+Slider rendering, physical dragging, and combat feel still need the manual play
+check above. The automatic test harness is only in a separate test copy of the map.
 
 For the original four-button recovery test, see [SOLO_TEST.md](SOLO_TEST.md).
 For the cause of the earlier compile failures, see [ROOT_CAUSE.md](ROOT_CAUSE.md).

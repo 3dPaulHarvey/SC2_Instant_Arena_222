@@ -1,4 +1,4 @@
-// Instant Arena v0.1.2 - compact text submenus.
+// Instant Arena v0.1.3 - live game-speed slider.
 // The build script embeds this code into the map's editable Custom Script element.
 
 const int ARENA_PLAYER = 1;
@@ -18,6 +18,9 @@ int arenaEnemyButton;
 int arenaClearButton;
 int arenaResetButton;
 int arenaStatusLabel;
+int arenaSpeedSlider;
+int arenaSpeedLabel;
+int arenaSpeedIndex = -1;
 
 void ArenaRefreshStatus () {
     string status;
@@ -114,6 +117,57 @@ bool ArenaMenuChanged (bool testConds, bool runActions) {
     return true;
 }
 
+string ArenaSpeedName (int speed) {
+    if (speed == c_gameSpeedSlower) { return "Slower"; }
+    if (speed == c_gameSpeedSlow) { return "Slow"; }
+    if (speed == c_gameSpeedNormal) { return "Normal"; }
+    if (speed == c_gameSpeedFast) { return "Fast"; }
+    if (speed == c_gameSpeedFaster) { return "Faster"; }
+    return "Unknown";
+}
+
+void ArenaRefreshSpeed () {
+    int speed;
+    speed = GameGetSpeedValue();
+    // Read back the engine's actual speed before updating the label and slider.
+    arenaSpeedIndex = speed;
+    libNtve_gf_SetDialogItemText(arenaSpeedLabel,
+        StringToText("Game speed: " + ArenaSpeedName(speed)), PlayerGroupSingle(ARENA_PLAYER));
+    if (DialogControlGetPropertyAsFixed(arenaSpeedSlider, c_triggerControlPropertyValue, ARENA_PLAYER) != IntToFixed(speed)) {
+        DialogControlSetPropertyAsFixed(arenaSpeedSlider, c_triggerControlPropertyValue,
+            PlayerGroupSingle(ARENA_PLAYER), IntToFixed(speed));
+    }
+}
+
+void ArenaSetSpeed (int speed) {
+    if (speed < c_gameSpeedSlower) { speed = c_gameSpeedSlower; }
+    if (speed > c_gameSpeedFaster) { speed = c_gameSpeedFaster; }
+    if (GameGetSpeedValue() != speed) {
+        GameSetSpeedValue(speed);
+    }
+    ArenaRefreshSpeed();
+}
+
+bool ArenaSpeedChanged (bool testConds, bool runActions) {
+    int speed;
+    if (!runActions || EventPlayer() != ARENA_PLAYER || EventDialogControl() != arenaSpeedSlider) {
+        return true;
+    }
+    // The engine has five discrete presets. Snap dragging to the nearest one.
+    speed = FixedToInt(DialogControlGetPropertyAsFixed(arenaSpeedSlider,
+        c_triggerControlPropertyValue, ARENA_PLAYER) + 0.5);
+    ArenaSetSpeed(speed);
+    return true;
+}
+
+bool ArenaSpeedSync (bool testConds, bool runActions) {
+    // Keep the control accurate if speed is changed through SC2's own controls.
+    if (runActions && GameGetSpeedValue() != arenaSpeedIndex) {
+        ArenaRefreshSpeed();
+    }
+    return true;
+}
+
 void ArenaClearGroup (unitgroup army) {
     unit target;
     while (UnitGroupCount(army, c_unitCountAll) > 0) {
@@ -202,8 +256,11 @@ bool ArenaUnitDied (bool testConds, bool runActions) {
 void ArenaInit () {
     int titleLabel;
     int helpLabel;
+    int speedHelpLabel;
     trigger buttonTrigger;
     trigger menuTrigger;
+    trigger speedTrigger;
+    trigger speedSyncTrigger;
     trigger deathTrigger;
 
     arenaMyArmy = UnitGroupEmpty();
@@ -216,7 +273,7 @@ void ArenaInit () {
     VisRevealArea(ARENA_PLAYER, RegionEntireMap(), 0.0, false);
     CameraPan(ARENA_PLAYER, Point(16.0, 16.0), 0.0, 0.0, 10.0, false);
 
-    arenaDialog = DialogCreate(300, 420, c_anchorTopLeft, 14, 14, false);
+    arenaDialog = DialogCreate(300, 526, c_anchorTopLeft, 14, 14, false);
     titleLabel = DialogControlCreate(arenaDialog, c_triggerControlTypeLabel);
     DialogControlSetSize(titleLabel, PlayerGroupSingle(ARENA_PLAYER), 260, 24);
     DialogControlSetPosition(titleLabel, PlayerGroupSingle(ARENA_PLAYER), c_anchorTopLeft, 20, 16);
@@ -240,6 +297,26 @@ void ArenaInit () {
     DialogControlSetSize(helpLabel, PlayerGroupSingle(ARENA_PLAYER), 260, 26);
     DialogControlSetPosition(helpLabel, PlayerGroupSingle(ARENA_PLAYER), c_anchorTopLeft, 20, 382);
     libNtve_gf_SetDialogItemText(helpLabel, StringToText("Choose race, unit, then spawn."), PlayerGroupSingle(ARENA_PLAYER));
+
+    arenaSpeedLabel = DialogControlCreate(arenaDialog, c_triggerControlTypeLabel);
+    DialogControlSetSize(arenaSpeedLabel, PlayerGroupSingle(ARENA_PLAYER), 260, 24);
+    DialogControlSetPosition(arenaSpeedLabel, PlayerGroupSingle(ARENA_PLAYER), c_anchorTopLeft, 20, 418);
+    arenaSpeedSlider = DialogControlCreate(arenaDialog, c_triggerControlTypeSlider);
+    DialogControlSetSize(arenaSpeedSlider, PlayerGroupSingle(ARENA_PLAYER), 260, 32);
+    DialogControlSetPosition(arenaSpeedSlider, PlayerGroupSingle(ARENA_PLAYER), c_anchorTopLeft, 20, 450);
+    DialogControlSetPropertyAsFixed(arenaSpeedSlider, c_triggerControlPropertyMinValue,
+        PlayerGroupSingle(ARENA_PLAYER), IntToFixed(c_gameSpeedSlower));
+    DialogControlSetPropertyAsFixed(arenaSpeedSlider, c_triggerControlPropertyMaxValue,
+        PlayerGroupSingle(ARENA_PLAYER), IntToFixed(c_gameSpeedFaster));
+    DialogControlSetPropertyAsText(arenaSpeedSlider, c_triggerControlPropertyTooltip,
+        PlayerGroupSingle(ARENA_PLAYER), StringToText("Changes game speed immediately for the whole match."));
+    speedHelpLabel = DialogControlCreate(arenaDialog, c_triggerControlTypeLabel);
+    DialogControlSetSize(speedHelpLabel, PlayerGroupSingle(ARENA_PLAYER), 260, 24);
+    DialogControlSetPosition(speedHelpLabel, PlayerGroupSingle(ARENA_PLAYER), c_anchorTopLeft, 20, 490);
+    libNtve_gf_SetDialogItemText(speedHelpLabel, StringToText("Left: Slower   Right: Faster"), PlayerGroupSingle(ARENA_PLAYER));
+    GameSetSpeedLocked(false);
+    GameSetSpeedValueMinimum(c_gameSpeedSlower);
+    ArenaSetSpeed(c_gameSpeedNormal);
     ArenaRefreshStatus();
     DialogSetVisible(arenaDialog, PlayerGroupSingle(ARENA_PLAYER), true);
 
@@ -248,6 +325,10 @@ void ArenaInit () {
     menuTrigger = TriggerCreate("ArenaMenuChanged");
     TriggerAddEventDialogControl(menuTrigger, ARENA_PLAYER, arenaRaceMenu, c_triggerControlEventTypeSelectionChanged);
     TriggerAddEventDialogControl(menuTrigger, ARENA_PLAYER, arenaUnitMenu, c_triggerControlEventTypeSelectionChanged);
+    speedTrigger = TriggerCreate("ArenaSpeedChanged");
+    TriggerAddEventDialogControl(speedTrigger, ARENA_PLAYER, arenaSpeedSlider, c_triggerControlEventTypeValueChanged);
+    speedSyncTrigger = TriggerCreate("ArenaSpeedSync");
+    TriggerAddEventTimePeriodic(speedSyncTrigger, 0.5, c_timeReal);
     deathTrigger = TriggerCreate("ArenaUnitDied");
     TriggerAddEventUnitDied(deathTrigger, null);
 }
