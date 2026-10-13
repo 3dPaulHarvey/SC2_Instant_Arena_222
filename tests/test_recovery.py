@@ -18,7 +18,7 @@ class RecoveryTests(unittest.TestCase):
     def test_galaxy_array_syntax(self):
         self.assertIn("PASS", validate(self_test=True))
 
-    def test_gameplay_logic_still_matches_working_backup(self):
+    def test_army_controls_still_match_working_backup(self):
         current = build_map.source_code()
         backup = (ROOT / "backups/v0.1-marine-only/Arena.galaxy").read_text(encoding="utf-8")
 
@@ -36,9 +36,9 @@ class RecoveryTests(unittest.TestCase):
                     depth -= 1
             return source[match.start():position]
 
-        # Presentation may evolve; the tested spawn, ownership, clearing, and
-        # death-handling code must stay intact for this small visual increment.
-        for name in ["ArenaSpawn", "ArenaButtonClicked", "ArenaClearGroup", "ArenaUnitDied", "ArenaRefreshStatus"]:
+        # The roster changes the unit type spawned. The existing button actions,
+        # army clearing, counters, and death handling stay at the tested baseline.
+        for name in ["ArenaButtonClicked", "ArenaClearGroup", "ArenaUnitDied", "ArenaRefreshStatus"]:
             self.assertEqual(function_body(current, name), function_body(backup, name), name)
 
     def test_bad_syntax_cannot_replace_the_playable_map(self):

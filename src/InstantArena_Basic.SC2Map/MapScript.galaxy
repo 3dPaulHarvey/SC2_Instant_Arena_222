@@ -1,17 +1,20 @@
 include "TriggerLibs/NativeLib"
 
-// Instant Arena v0.1.1 - Marine button portrait test.
+// Instant Arena v0.1.2 - compact text submenus.
 // The build script embeds this code into the map's editable Custom Script element.
 
 const int ARENA_PLAYER = 1;
 const int ARENA_ENEMY = 15;
 const int ARENA_LIMIT = 100;
+const int ARENA_UNITS_PER_RACE = 4;
 
 unitgroup arenaMyArmy;
 unitgroup arenaEnemyArmy;
 point arenaMySpawn;
 point arenaEnemySpawn;
 int arenaDialog;
+int arenaRaceMenu;
+int arenaUnitMenu;
 int arenaSpawnButton;
 int arenaEnemyButton;
 int arenaClearButton;
@@ -35,6 +38,84 @@ int ArenaButton (string caption, int y) {
     return control;
 }
 
+int ArenaMenu (int y) {
+    int control;
+    control = DialogControlCreate(arenaDialog, c_triggerControlTypePulldown);
+    // SC2's pulldown frame needs more vertical padding than a plain button.
+    DialogControlSetSize(control, PlayerGroupSingle(ARENA_PLAYER), 260, 52);
+    DialogControlSetPosition(control, PlayerGroupSingle(ARENA_PLAYER), c_anchorTopLeft, 20, y);
+    return control;
+}
+
+// Pulldown item indices start at 1. Invalid selections never create a unit.
+// This small roster uses no arrays or custom assets.
+string ArenaUnitType (int race, int index) {
+    if (race == 1) {
+        if (index == 1) { return "Marine"; }
+        if (index == 2) { return "Marauder"; }
+        if (index == 3) { return "Reaper"; }
+        if (index == 4) { return "Hellion"; }
+    }
+    else if (race == 2) {
+        if (index == 1) { return "Zealot"; }
+        if (index == 2) { return "Stalker"; }
+        if (index == 3) { return "Sentry"; }
+        if (index == 4) { return "Immortal"; }
+    }
+    else if (race == 3) {
+        if (index == 1) { return "Zergling"; }
+        if (index == 2) { return "Roach"; }
+        if (index == 3) { return "Hydralisk"; }
+        if (index == 4) { return "Ultralisk"; }
+    }
+    return "";
+}
+
+string ArenaSelectedUnitType () {
+    return ArenaUnitType(DialogControlGetSelectedItem(arenaRaceMenu, ARENA_PLAYER),
+        DialogControlGetSelectedItem(arenaUnitMenu, ARENA_PLAYER));
+}
+
+void ArenaRefreshSelection () {
+    string unitType;
+    unitType = ArenaSelectedUnitType();
+    if (unitType == "") {
+        return;
+    }
+    libNtve_gf_SetDialogItemText(arenaSpawnButton, StringToText("Spawn My " + unitType), PlayerGroupSingle(ARENA_PLAYER));
+    libNtve_gf_SetDialogItemText(arenaEnemyButton, StringToText("Spawn Enemy " + unitType), PlayerGroupSingle(ARENA_PLAYER));
+}
+
+void ArenaFillUnitMenu () {
+    int race;
+    int index;
+    race = DialogControlGetSelectedItem(arenaRaceMenu, ARENA_PLAYER);
+    if (race < 1 || race > 3) {
+        return;
+    }
+    DialogControlRemoveAllItems(arenaUnitMenu, PlayerGroupSingle(ARENA_PLAYER));
+    index = 1;
+    while (index <= ARENA_UNITS_PER_RACE) {
+        DialogControlAddItem(arenaUnitMenu, PlayerGroupSingle(ARENA_PLAYER), StringToText(ArenaUnitType(race, index)));
+        index += 1;
+    }
+    DialogControlSelectItem(arenaUnitMenu, PlayerGroupSingle(ARENA_PLAYER), 1);
+    ArenaRefreshSelection();
+}
+
+bool ArenaMenuChanged (bool testConds, bool runActions) {
+    if (!runActions || EventPlayer() != ARENA_PLAYER) {
+        return true;
+    }
+    if (EventDialogControl() == arenaRaceMenu) {
+        ArenaFillUnitMenu();
+    }
+    else if (EventDialogControl() == arenaUnitMenu) {
+        ArenaRefreshSelection();
+    }
+    return true;
+}
+
 void ArenaClearGroup (unitgroup army) {
     unit target;
     while (UnitGroupCount(army, c_unitCountAll) > 0) {
@@ -48,6 +129,11 @@ void ArenaSpawn (int owner) {
     unitgroup army;
     point spawn;
     fixed facing;
+    string unitType;
+    unitType = ArenaSelectedUnitType();
+    if (unitType == "") {
+        return;
+    }
     if (owner == ARENA_PLAYER) {
         army = arenaMyArmy;
         spawn = arenaMySpawn;
@@ -63,7 +149,7 @@ void ArenaSpawn (int owner) {
             StringToText("100 living units on this side. Clear an army or fight to make room."));
         return;
     }
-    UnitCreate(1, "Marine", 0, owner, spawn, facing);
+    UnitCreate(1, unitType, 0, owner, spawn, facing);
     // Normal placement lets SC2 find nearby space instead of stacking units.
     if (UnitLastCreated() != null) {
         UnitGroupAdd(army, UnitLastCreated());
@@ -118,8 +204,8 @@ bool ArenaUnitDied (bool testConds, bool runActions) {
 void ArenaInit () {
     int titleLabel;
     int helpLabel;
-    int marinePortrait;
     trigger buttonTrigger;
+    trigger menuTrigger;
     trigger deathTrigger;
 
     arenaMyArmy = UnitGroupEmpty();
@@ -132,7 +218,7 @@ void ArenaInit () {
     VisRevealArea(ARENA_PLAYER, RegionEntireMap(), 0.0, false);
     CameraPan(ARENA_PLAYER, Point(16.0, 16.0), 0.0, 0.0, 10.0, false);
 
-    arenaDialog = DialogCreate(300, 294, c_anchorTopLeft, 14, 14, false);
+    arenaDialog = DialogCreate(300, 420, c_anchorTopLeft, 14, 14, false);
     titleLabel = DialogControlCreate(arenaDialog, c_triggerControlTypeLabel);
     DialogControlSetSize(titleLabel, PlayerGroupSingle(ARENA_PLAYER), 260, 24);
     DialogControlSetPosition(titleLabel, PlayerGroupSingle(ARENA_PLAYER), c_anchorTopLeft, 20, 16);
@@ -141,28 +227,29 @@ void ArenaInit () {
     arenaStatusLabel = DialogControlCreate(arenaDialog, c_triggerControlTypeLabel);
     DialogControlSetSize(arenaStatusLabel, PlayerGroupSingle(ARENA_PLAYER), 260, 24);
     DialogControlSetPosition(arenaStatusLabel, PlayerGroupSingle(ARENA_PLAYER), c_anchorTopLeft, 20, 42);
-    arenaSpawnButton = ArenaButton("Spawn My Marine", 72);
-    // Add one portrait to the existing button; keep its click handler unchanged.
-    marinePortrait = DialogControlCreate(arenaDialog, c_triggerControlTypeImage);
-    DialogControlSetSize(marinePortrait, PlayerGroupSingle(ARENA_PLAYER), 32, 32);
-    DialogControlSetPosition(marinePortrait, PlayerGroupSingle(ARENA_PLAYER), c_anchorTopLeft, 25, 75);
-    libNtve_gf_SetDialogItemImageType(marinePortrait, c_triggerImageTypeNormal, PlayerGroupSingle(ARENA_PLAYER));
-    libNtve_gf_SetDialogItemImage(marinePortrait, "Assets\\Textures\\btn-unit-terran-marine.dds", PlayerGroupSingle(ARENA_PLAYER));
-    libNtve_gf_SetDialogItemRenderPriority(marinePortrait, 100, PlayerGroupSingle(ARENA_PLAYER));
-    DialogControlSetPropertyAsBool(marinePortrait, c_triggerControlPropertyAcceptMouseTarget,
-        PlayerGroupSingle(ARENA_PLAYER), false);
-    arenaEnemyButton = ArenaButton("Spawn Enemy Marine", 116);
-    arenaClearButton = ArenaButton("Clear My Army", 160);
-    arenaResetButton = ArenaButton("Reset Arena", 204);
+    arenaRaceMenu = ArenaMenu(72);
+    DialogControlAddItem(arenaRaceMenu, PlayerGroupSingle(ARENA_PLAYER), StringToText("Terran"));
+    DialogControlAddItem(arenaRaceMenu, PlayerGroupSingle(ARENA_PLAYER), StringToText("Protoss"));
+    DialogControlAddItem(arenaRaceMenu, PlayerGroupSingle(ARENA_PLAYER), StringToText("Zerg"));
+    DialogControlSelectItem(arenaRaceMenu, PlayerGroupSingle(ARENA_PLAYER), 1);
+    arenaUnitMenu = ArenaMenu(132);
+    arenaSpawnButton = ArenaButton("Spawn My Marine", 198);
+    arenaEnemyButton = ArenaButton("Spawn Enemy Marine", 242);
+    arenaClearButton = ArenaButton("Clear My Army", 286);
+    arenaResetButton = ArenaButton("Reset Arena", 330);
+    ArenaFillUnitMenu();
     helpLabel = DialogControlCreate(arenaDialog, c_triggerControlTypeLabel);
     DialogControlSetSize(helpLabel, PlayerGroupSingle(ARENA_PLAYER), 260, 26);
-    DialogControlSetPosition(helpLabel, PlayerGroupSingle(ARENA_PLAYER), c_anchorTopLeft, 20, 254);
-    libNtve_gf_SetDialogItemText(helpLabel, StringToText("Select your Marines and attack-move."), PlayerGroupSingle(ARENA_PLAYER));
+    DialogControlSetPosition(helpLabel, PlayerGroupSingle(ARENA_PLAYER), c_anchorTopLeft, 20, 382);
+    libNtve_gf_SetDialogItemText(helpLabel, StringToText("Choose race, unit, then spawn."), PlayerGroupSingle(ARENA_PLAYER));
     ArenaRefreshStatus();
     DialogSetVisible(arenaDialog, PlayerGroupSingle(ARENA_PLAYER), true);
 
     buttonTrigger = TriggerCreate("ArenaButtonClicked");
     TriggerAddEventDialogControl(buttonTrigger, ARENA_PLAYER, c_invalidDialogControlId, c_triggerControlEventTypeClick);
+    menuTrigger = TriggerCreate("ArenaMenuChanged");
+    TriggerAddEventDialogControl(menuTrigger, ARENA_PLAYER, arenaRaceMenu, c_triggerControlEventTypeSelectionChanged);
+    TriggerAddEventDialogControl(menuTrigger, ARENA_PLAYER, arenaUnitMenu, c_triggerControlEventTypeSelectionChanged);
     deathTrigger = TriggerCreate("ArenaUnitDied");
     TriggerAddEventUnitDied(deathTrigger, null);
 }

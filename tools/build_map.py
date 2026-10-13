@@ -1,4 +1,4 @@
-"""Build the Marine-only map. Syntax must pass before map files are changed."""
+"""Build the arena map. Syntax must pass before map files are changed."""
 
 from pathlib import Path
 import tempfile

@@ -2,10 +2,9 @@
 
 A StarCraft II custom arena for instant unit spawning and continuous combat.
 
-The active build is the **Basic Marine arena**, restored from the version that
-worked in the user's solo test. Version 0.1.1 adds one small Marine portrait icon
-inside **Spawn My Marine**. The spawn logic remains the tested baseline.
-Race menus and speed controls remain archived. Nothing has been published to Battle.net.
+The active build is **v0.1.2: compact text submenus**, based on the working solo
+arena. Choose a race, choose a unit, then spawn it for your army or the enemy.
+The portrait experiment has been removed. Nothing has been published to Battle.net.
 
 ## Open and test
 
@@ -13,22 +12,31 @@ Race menus and speed controls remain archived. Nothing has been published to Bat
 2. Double-click **Open Arena.cmd** in this project.
 3. The launcher opens `src/InstantArena_Basic.SC2Map/ComponentList.SC2Components`.
 4. Press **Ctrl+F9** to run the local test.
-5. Use **Spawn My Marine**, **Spawn Enemy Marine**, **Clear My Army**, and **Reset Arena**.
+5. Choose **Terran**, **Protoss**, or **Zerg** in the top dropdown. The second
+   dropdown lists that race's units.
+6. Use **Spawn My [Unit]**, **Spawn Enemy [Unit]**, **Clear My Army**, and **Reset Arena**.
 
-Enemy Marines attack-move toward your spawn area. You command your own units
+Enemy units attack-move toward your spawn area. You command your own units
 normally. Losing all units does not end the session. Each side can have up to 100
 living spawned units.
 
-If you see race menus, close the old experimental map and reopen the Basic map
-with the launcher. See [SOLO_TEST.md](docs/SOLO_TEST.md) for the recovery checklist
-and [NEXT_SOLO_TEST.md](docs/NEXT_SOLO_TEST.md) for the new portrait click test.
+| Race | Unit submenu |
+| --- | --- |
+| Terran | Marine, Marauder, Reaper, Hellion |
+| Protoss | Zealot, Stalker, Sentry, Immortal |
+| Zerg | Zergling, Roach, Hydralisk, Ultralisk |
+
+Changing race selects its first unit. Menu selections do not spawn anything.
+Reset Arena clears both armies and leaves the menu selection in place.
+See [NEXT_SOLO_TEST.md](docs/NEXT_SOLO_TEST.md) for the current play checklist
+and [SOLO_TEST.md](docs/SOLO_TEST.md) for the original recovery test.
 See [ROOT_CAUSE.md](docs/ROOT_CAUSE.md) for the compiler failure and repair.
 
 ## Project files
 
 | Path | Purpose |
 | --- | --- |
-| `src/Arena.galaxy` | The tested Marine-only source |
+| `src/Arena.galaxy` | Arena source, including the race and unit submenus |
 | `src/InstantArena_Basic.SC2Map/` | The active editable map, including terrain and triggers |
 | `tools/build_map.py` | Checks syntax before updating the map's script and triggers |
 | `tools/validate_galaxy.py` | Runs the bundled Galaxy syntax parser |
@@ -69,9 +77,9 @@ failure before the playable map is overwritten.
 
 ## Next development steps
 
-First confirm the Marine portrait renders and allows clicks to reach its existing
-button. Then add plain Zealot and Zergling buttons, before restoring navigation
-or speed controls one feature at a time.
+Confirm the race and unit dropdowns work and all twelve units spawn correctly.
+Then expand the roster one small step at a time. Speed controls remain a separate
+future increment.
 
 Online 1v1 still needs a second human slot, per-player controls, and a two-client
 test before publishing.
