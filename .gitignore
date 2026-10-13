@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+tools/vendor/
+tools/_reference/
+*.SC2Map.backup
+*.SC2Map.temp
