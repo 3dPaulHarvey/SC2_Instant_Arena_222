@@ -1,12 +1,11 @@
 include "TriggerLibs/NativeLib"
 
-// Instant Arena v0.1.3 - live game-speed slider.
+// Instant Arena v0.1.4 - standard multiplayer unit roster.
 // The build script embeds this code into the map's editable Custom Script element.
 
 const int ARENA_PLAYER = 1;
 const int ARENA_ENEMY = 15;
 const int ARENA_LIMIT = 100;
-const int ARENA_UNITS_PER_RACE = 4;
 
 unitgroup arenaMyArmy;
 unitgroup arenaEnemyArmy;
@@ -51,25 +50,72 @@ int ArenaMenu (int y) {
 }
 
 // Pulldown item indices start at 1. Invalid selections never create a unit.
-// This small roster uses no arrays or custom assets.
+// Standard multiplayer units in their normal mobile form; no custom assets.
+int ArenaUnitCount (int race) {
+    if (race == 1) { return 17; }
+    if (race == 2) { return 18; }
+    if (race == 3) { return 17; }
+    return 0;
+}
+
 string ArenaUnitType (int race, int index) {
     if (race == 1) {
         if (index == 1) { return "Marine"; }
         if (index == 2) { return "Marauder"; }
         if (index == 3) { return "Reaper"; }
-        if (index == 4) { return "Hellion"; }
+        if (index == 4) { return "Ghost"; }
+        if (index == 5) { return "Hellion"; }
+        if (index == 6) { return "HellionTank"; }
+        if (index == 7) { return "WidowMine"; }
+        if (index == 8) { return "Cyclone"; }
+        if (index == 9) { return "SiegeTank"; }
+        if (index == 10) { return "Thor"; }
+        if (index == 11) { return "VikingFighter"; }
+        if (index == 12) { return "Medivac"; }
+        if (index == 13) { return "Liberator"; }
+        if (index == 14) { return "Banshee"; }
+        if (index == 15) { return "Raven"; }
+        if (index == 16) { return "Battlecruiser"; }
+        if (index == 17) { return "SCV"; }
     }
     else if (race == 2) {
         if (index == 1) { return "Zealot"; }
         if (index == 2) { return "Stalker"; }
         if (index == 3) { return "Sentry"; }
-        if (index == 4) { return "Immortal"; }
+        if (index == 4) { return "Adept"; }
+        if (index == 5) { return "HighTemplar"; }
+        if (index == 6) { return "DarkTemplar"; }
+        if (index == 7) { return "Archon"; }
+        if (index == 8) { return "Immortal"; }
+        if (index == 9) { return "Colossus"; }
+        if (index == 10) { return "Disruptor"; }
+        if (index == 11) { return "Observer"; }
+        if (index == 12) { return "WarpPrism"; }
+        if (index == 13) { return "Phoenix"; }
+        if (index == 14) { return "VoidRay"; }
+        if (index == 15) { return "Oracle"; }
+        if (index == 16) { return "Tempest"; }
+        if (index == 17) { return "Carrier"; }
+        if (index == 18) { return "Probe"; }
     }
     else if (race == 3) {
         if (index == 1) { return "Zergling"; }
-        if (index == 2) { return "Roach"; }
-        if (index == 3) { return "Hydralisk"; }
-        if (index == 4) { return "Ultralisk"; }
+        if (index == 2) { return "Baneling"; }
+        if (index == 3) { return "Roach"; }
+        if (index == 4) { return "Ravager"; }
+        if (index == 5) { return "Hydralisk"; }
+        if (index == 6) { return "LurkerMP"; }
+        if (index == 7) { return "Infestor"; }
+        if (index == 8) { return "SwarmHostMP"; }
+        if (index == 9) { return "Ultralisk"; }
+        if (index == 10) { return "Queen"; }
+        if (index == 11) { return "Overlord"; }
+        if (index == 12) { return "Overseer"; }
+        if (index == 13) { return "Mutalisk"; }
+        if (index == 14) { return "Corruptor"; }
+        if (index == 15) { return "BroodLord"; }
+        if (index == 16) { return "Viper"; }
+        if (index == 17) { return "Drone"; }
     }
     return "";
 }
@@ -85,8 +131,8 @@ void ArenaRefreshSelection () {
     if (unitType == "") {
         return;
     }
-    libNtve_gf_SetDialogItemText(arenaSpawnButton, StringToText("Spawn My " + unitType), PlayerGroupSingle(ARENA_PLAYER));
-    libNtve_gf_SetDialogItemText(arenaEnemyButton, StringToText("Spawn Enemy " + unitType), PlayerGroupSingle(ARENA_PLAYER));
+    libNtve_gf_SetDialogItemText(arenaSpawnButton, StringToText("Spawn My ") + UnitTypeGetName(unitType), PlayerGroupSingle(ARENA_PLAYER));
+    libNtve_gf_SetDialogItemText(arenaEnemyButton, StringToText("Spawn Enemy ") + UnitTypeGetName(unitType), PlayerGroupSingle(ARENA_PLAYER));
 }
 
 void ArenaFillUnitMenu () {
@@ -98,8 +144,8 @@ void ArenaFillUnitMenu () {
     }
     DialogControlRemoveAllItems(arenaUnitMenu, PlayerGroupSingle(ARENA_PLAYER));
     index = 1;
-    while (index <= ARENA_UNITS_PER_RACE) {
-        DialogControlAddItem(arenaUnitMenu, PlayerGroupSingle(ARENA_PLAYER), StringToText(ArenaUnitType(race, index)));
+    while (index <= ArenaUnitCount(race)) {
+        DialogControlAddItem(arenaUnitMenu, PlayerGroupSingle(ARENA_PLAYER), UnitTypeGetName(ArenaUnitType(race, index)));
         index += 1;
     }
     DialogControlSelectItem(arenaUnitMenu, PlayerGroupSingle(ARENA_PLAYER), 1);
@@ -181,6 +227,8 @@ void ArenaClearGroup (unitgroup army) {
 
 void ArenaSpawn (int owner) {
     unitgroup army;
+    unitgroup created;
+    unit spawned;
     point spawn;
     fixed facing;
     string unitType;
@@ -203,14 +251,26 @@ void ArenaSpawn (int owner) {
             StringToText("100 living units on this side. Clear an army or fight to make room."));
         return;
     }
-    UnitCreate(1, unitType, 0, owner, spawn, facing);
+    created = UnitCreate(1, unitType, 0, owner, spawn, facing);
+    spawned = UnitGroupUnit(created, 1);
     // Normal placement lets SC2 find nearby space instead of stacking units.
-    if (UnitLastCreated() != null) {
-        UnitGroupAdd(army, UnitLastCreated());
+    if (spawned != null) {
+        UnitGroupAdd(army, spawned);
         if (owner == ARENA_ENEMY) {
-            UnitIssueOrder(UnitLastCreated(),
-                OrderTargetingPoint(AbilityCommand("attack", 0), arenaMySpawn), c_orderQueueReplace);
+            if (UnitAbilityExists(spawned, "attack")) {
+                UnitIssueOrder(spawned,
+                    OrderTargetingPoint(AbilityCommand("attack", 0), arenaMySpawn), c_orderQueueReplace);
+            }
+            else if (UnitAbilityExists(spawned, "move")) {
+                // Transports, detectors, and other support units cannot attack.
+                UnitIssueOrder(spawned,
+                    OrderTargetingPoint(AbilityCommand("move", 0), arenaMySpawn), c_orderQueueReplace);
+            }
         }
+    }
+    else {
+        UIDisplayMessage(PlayerGroupSingle(ARENA_PLAYER), c_messageAreaSubtitle,
+            StringToText("No room here. Move units away or clear an army."));
     }
     ArenaRefreshStatus();
 }

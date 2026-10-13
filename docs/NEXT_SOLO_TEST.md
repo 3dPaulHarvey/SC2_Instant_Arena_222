@@ -1,45 +1,53 @@
 # Next solo test
 
-Version **0.1.3** adds a live game-speed slider below the arena controls.
-The race/unit dropdowns and four army buttons are still available.
+The user confirmed that the live speed test worked. Version **0.1.4** expands the
+race/unit dropdowns to **52 standard multiplayer units** and loads **Void Multi
+(Mod)** so the regular Heart of the Swarm and Legacy of the Void units are available.
 
-Test live speed:
+Test the expanded roster:
 
-1. Reopen the Basic map using **Open Arena.cmd**, then press **Ctrl+F9**.
-2. Check that the speed label says **Game speed: Normal** and the slider starts
-   in the middle. The slider should remain below the reset button and help text.
-3. Spawn a few units for yourself and an enemy unit. Watch the enemy moving toward
-   your army, or order your own units to move across the arena.
-4. While those units are moving, drag the slider all the way left. It should snap
-   to **Slower**, update the label, and immediately slow movement and combat.
-5. Drag it all the way right. It should snap to **Faster**, update the label, and
-   immediately speed up the same existing units. Reloading the map is unnecessary.
-6. Try the three interior positions: **Slow**, **Normal**, and **Fast**. Drag back
-   and forth repeatedly. The label and slider should settle on the same preset.
-7. At Slower and Faster, switch races, select a different unit, and use both spawn
-   buttons. Each click should still create one unit. Changing speed should not
-   spawn, clear, or replace any units.
-8. Test **Clear My Army** and **Reset Arena**. Reset should zero both counters while
-   keeping the selected unit and speed. Move the slider back to Normal afterward.
-9. If SC2's own speed controls are available in the game menu, change speed there
-   once. The arena slider and label should catch up within about half a second.
+1. Close the previous test game and reopen the map with **Open Arena.cmd**, then
+   press **Ctrl+F9**. This ensures the new multiplayer dependency is loaded.
+2. Check the race and unit dropdowns. Terran should have **17** entries, Protoss
+   **18**, and Zerg **17**. Scroll within the unit list if necessary.
+3. Choose Terran and try **Hellbat, Widow Mine, Cyclone, Siege Tank, Liberator,
+   Medivac, Raven, Battlecruiser**, and the final entry **SCV**. Click each spawn
+   button once for the selected unit and check the appropriate counter rises by one.
+4. Choose Protoss and try **Adept, High Templar, Dark Templar, Colossus, Disruptor,
+   Observer, Warp Prism, Oracle, Tempest, Carrier**, and the final entry **Probe**.
+5. Choose Zerg and try **Baneling, Ravager, Lurker, Swarm Host, Queen, Overlord,
+   Overseer, Mutalisk, Brood Lord, Viper**, and the final entry **Drone**.
+6. Switch between races several times. Each switch should replace the unit list
+   and select its first entry: Marine, Zealot, or Zergling. Captions should use the
+   readable unit names, such as Hellbat, Siege Tank, and Swarm Host.
+7. Try ordinary ground and air combat. Normal targeting rules apply: for example,
+   Vikings in fighter mode and Corruptors target air, while Zealots target ground.
+8. Select your Siege Tank, Widow Mine, Lurker, or Liberator and use its command card
+   to change mode or burrow. These entries spawn in their normal mobile forms.
+   Use spell and transport abilities manually on your own units as needed.
+9. Drag the speed slider between Slower and Faster during a fight. It should keep
+   working with the new units. Test **Clear My Army** and **Reset Arena**; the
+   selected unit and speed should stay in place while the army counters clear.
 
-The slider snaps to SC2's five native game-speed presets.
-This affects the whole match. The current solo controller is Player 1; online 1v1
-still needs a second-human setup and a two-client test.
+The complete roster is listed in [README.md](../README.md). It includes standard
+combat, support, detector, transport, and worker units. Buildings, campaign heroes,
+summoned-unit menu entries, and the unique Mothership are omitted from this increment.
 
-Galaxy syntax and all four recovery checks pass. An isolated SC2 runtime test also
-passed all five presets: each requested speed matched the engine's actual value
-and slider position, Faster advanced game time faster than Slower, and the test
-restored Normal afterward. No script or text-error log was produced during this run.
-Slider rendering, physical dragging, and combat feel still need the manual play
-check above. The automatic test harness is only in a separate test copy of the map.
+Research requirements, energy, and other unit rules follow the standard game data.
+The enemy side receives a basic attack-move or move order; it does not get new
+spellcasting or mode-changing AI in this increment.
 
-For the original four-button recovery test, see [SOLO_TEST.md](SOLO_TEST.md).
+Publishing is unnecessary for solo testing. The active map is
+`src/InstantArena_Basic.SC2Map/ComponentList.SC2Components`; use the launcher even
+if an old map path is still shown in an IDE tab.
+
+Galaxy syntax and all four recovery checks pass. An isolated SC2 runtime test
+passed all 52 roster entries: 104 friendly/hostile units had the expected types,
+owners, and counts. Race menu sizes and reset-to-first behavior also passed, and
+the original game speed was restored. No script or text-error log was produced.
+Interactive dropdown scrolling, combat abilities, and behavior at both speed
+extremes still need this play check. The automatic harness is only in a separate
+test copy of the map.
+
+For the original Marine recovery checklist, see [SOLO_TEST.md](SOLO_TEST.md).
 For the cause of the earlier compile failures, see [ROOT_CAUSE.md](ROOT_CAUSE.md).
-
-Open **Open Arena.cmd**, then press **Ctrl+F9**. The launcher now opens
-`src/InstantArena_Basic.SC2Map/ComponentList.SC2Components`.
-
-Do not use the archived race-menu builder. The current text menus are built by
-`tools/build_map.py` from `src/Arena.galaxy`.

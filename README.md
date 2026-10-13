@@ -2,7 +2,7 @@
 
 A StarCraft II custom arena for instant unit spawning and continuous combat.
 
-The active build is **v0.1.3: live game-speed slider**, based on the working solo
+The active build is **v0.1.4: standard multiplayer roster**, based on the working solo
 arena. Choose a race, choose a unit, then spawn it for your army or the enemy.
 Drag the speed slider while playing to slow down or speed up the entire match.
 Nothing has been published to Battle.net.
@@ -19,15 +19,24 @@ Nothing has been published to Battle.net.
 7. Drag the **Game speed** slider at the bottom of the panel. It snaps to
    **Slower, Slow, Normal, Fast, Faster**, from left to right.
 
-Enemy units attack-move toward your spawn area. You command your own units
+Enemy combat units attack-move toward your spawn area; support units move there.
+You command your own units
 normally. Losing all units does not end the session. Each side can have up to 100
 living spawned units.
 
 | Race | Unit submenu |
 | --- | --- |
-| Terran | Marine, Marauder, Reaper, Hellion |
-| Protoss | Zealot, Stalker, Sentry, Immortal |
-| Zerg | Zergling, Roach, Hydralisk, Ultralisk |
+| Terran (17) | Marine, Marauder, Reaper, Ghost, Hellion, Hellbat, Widow Mine, Cyclone, Siege Tank, Thor, Viking, Medivac, Liberator, Banshee, Raven, Battlecruiser, SCV |
+| Protoss (18) | Zealot, Stalker, Sentry, Adept, High Templar, Dark Templar, Archon, Immortal, Colossus, Disruptor, Observer, Warp Prism, Phoenix, Void Ray, Oracle, Tempest, Carrier, Probe |
+| Zerg (17) | Zergling, Baneling, Roach, Ravager, Hydralisk, Lurker, Infestor, Swarm Host, Ultralisk, Queen, Overlord, Overseer, Mutalisk, Corruptor, Brood Lord, Viper, Drone |
+
+The 52 entries use **Void Multi (Mod)**, SC2's Legacy of the Void multiplayer
+dependency. Units spawn in their normal mobile form. Use their own command cards
+for siege, burrow, transport, and spell abilities. Research requirements, energy,
+and attack-target restrictions follow the standard game data. Enemy units receive
+a basic attack-move or move order; their spells and mode changes need separate AI.
+The roster contains standard combat, support, and worker units. Buildings, campaign
+heroes, summoned-unit menu entries, and the unique Mothership are omitted.
 
 Changing race selects its first unit. Menu selections do not spawn anything.
 Reset Arena clears both armies and leaves the menu selection in place.
@@ -84,9 +93,8 @@ failure before the playable map is overwritten.
 
 ## Next development steps
 
-Confirm dragging the slider changes movement and combat speed during a fight.
-Check the race/unit menus and clear/reset controls at both speed extremes.
-Then expand the roster one small step at a time.
+The user confirmed the live speed control worked. Test the expanded dropdowns,
+ground and air combat, support units, and clear/reset behavior at both speed extremes.
 
 Online 1v1 still needs a second human slot, per-player controls, and a two-client
 test before publishing.
@@ -101,3 +109,4 @@ preserved by SC2Mapster. Its placed units were removed and its triggers replaced
 - [Component-folder export](https://s2editor-guides.readthedocs.io/New_Tutorials/07_Lessons/083_Export_Game_Assets/)
 - [Bundled parser provenance and MIT license](tools/galaxy_parser/README.md)
 - [Blizzard's shipped native speed API and cinematic speed changes](https://github.com/SC2Mapster/SC2GameData/blob/master/mods/core.sc2mod/base.sc2data/TriggerLibs/NativeLib.galaxy)
+- [Blizzard's standard Void multiplayer unit definitions](https://github.com/SC2Mapster/SC2GameData/blob/master/mods/voidmulti.sc2mod/base.sc2data/GameData/UnitData.xml)
